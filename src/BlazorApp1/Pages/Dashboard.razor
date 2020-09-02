@@ -1,0 +1,27 @@
+﻿@page "/dashboard"
+@using Services
+@using Models.Messages
+@using System.Reactive.Linq
+@inject IMessageService MessageService
+
+<h1>Rx Dashboard</h1>
+@if (LastErrorMessage != null)
+{
+    <p class="alert alert-danger">
+        <strong>Last error:</strong> @LastErrorMessage.Error from @LastErrorMessage.Source published at @LastErrorMessage.Date
+    </p>
+}
+
+@code {
+    public ErrorMessage LastErrorMessage { get; set; }
+
+    protected override void OnInitialized()
+    {
+        MessageService.Messages
+            .OfType<ErrorMessage>()
+            .Do(x => LastErrorMessage = x)
+            .Select(_ => Observable.FromAsync(async () => await InvokeAsync(() => StateHasChanged())))
+            .Concat()
+            .Subscribe();
+    }
+}
