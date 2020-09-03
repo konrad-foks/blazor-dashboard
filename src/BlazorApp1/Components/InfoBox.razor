@@ -1,0 +1,59 @@
+﻿@using Services
+@using Models.Messages
+@using System.Reactive.Linq
+@inject IMessageService MessageService
+
+
+<div class="card">
+    <h5 class="card-header">
+        Info box for <strong>@Source</strong>
+    </h5>
+    <div class="card-body">
+        @if (LastCounterMessage != null)
+        {
+            <h1 class="display-1 text-center">
+                @LastCounterMessage.Counter
+            </h1>
+        }
+        else
+        {
+            <h1 class="display-1 text-center">
+                <span class="spinner-grow text-dark align-middle"></span>
+            </h1>
+        }
+        @if (LastErrorMessage != null)
+        {
+            <p class="card-text">
+                @LastErrorMessage.Error <small>@LastErrorMessage.Date</small>
+            </p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Source { get; set; }
+
+    public ErrorMessage LastErrorMessage { get; set; }
+
+    public CounterMessage LastCounterMessage { get; set; }
+
+    protected override void OnInitialized()
+    {
+        MessageService.Messages
+            .Where(x => x.Source == Source)
+            .OfType<ErrorMessage>()
+            .Do(x => LastErrorMessage = x)
+            .Select(_ => Observable.FromAsync(async () => await InvokeAsync(() => StateHasChanged())))
+            .Concat()
+            .Subscribe();
+
+        MessageService.Messages
+            .Where(x => x.Source == Source)
+            .OfType<CounterMessage>()
+            .Do(x => LastCounterMessage = x)
+            .Select(_ => Observable.FromAsync(async () => await InvokeAsync(() => StateHasChanged())))
+            .Concat()
+            .Subscribe();
+    }
+}

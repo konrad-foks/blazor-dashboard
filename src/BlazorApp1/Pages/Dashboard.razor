@@ -7,10 +7,27 @@
 <h1>Rx Dashboard</h1>
 @if (LastErrorMessage != null)
 {
-    <p class="alert alert-danger">
-        <strong>Last error:</strong> @LastErrorMessage.Error from @LastErrorMessage.Source published at @LastErrorMessage.Date
-    </p>
+    <span class="alert alert-danger d-inline-block">
+        <strong>Last error:</strong> @LastErrorMessage.Error <small>(source <strong>@LastErrorMessage.Source</strong>, published at @LastErrorMessage.Date)</small>
+    </span>
 }
+else
+{
+    <span class="alert alert-success d-inline-block">
+        No errors!
+    </span>
+}
+<div class="row">
+    <div class="col-3">
+        <InfoBox Source="A"></InfoBox>
+    </div>
+    <div class="col-3">
+        <InfoBox Source="B"></InfoBox>
+    </div>
+    <div class="col-3">
+        <InfoBox Source="E"></InfoBox>
+    </div>
+</div>
 
 @code {
     public ErrorMessage LastErrorMessage { get; set; }
