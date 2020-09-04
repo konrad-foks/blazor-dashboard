@@ -26,7 +26,7 @@ namespace BlazorApp1
             var faker = new Faker();
 
             Observable
-                .Interval(TimeSpan.FromSeconds(2))
+                .Interval(TimeSpan.FromSeconds(1))
                 .Subscribe(x =>
                 {
                     messageService.Publish(new CounterMessage
@@ -38,7 +38,7 @@ namespace BlazorApp1
                 });
 
             Observable
-                .Interval(TimeSpan.FromSeconds(4))
+                .Interval(TimeSpan.FromSeconds(2))
                 .Subscribe(x =>
                 {
                     messageService.Publish(new ErrorMessage

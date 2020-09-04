@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using BlazorApp1.Data;
 using BlazorApp1.Services;
 
 namespace BlazorApp1
@@ -29,7 +28,6 @@ namespace BlazorApp1
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<IMessageService, MessageService>();
             services.AddHostedService<MessagesGeneratorBackgroundService>();
         }
