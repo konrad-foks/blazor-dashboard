@@ -1,6 +1,7 @@
 ﻿@using Services
 @using Models.Messages
 @using System.Reactive.Linq
+@implements IDisposable
 @inject IMessageService MessageService
 
 
@@ -38,22 +39,37 @@
 
     public CounterMessage LastCounterMessage { get; set; }
 
+    IDisposable subscriber1;
+    IDisposable subscriber2;
+
+    public void Dispose()
+    {
+        subscriber1?.Dispose();
+        subscriber2?.Dispose();
+    }
+
     protected override void OnInitialized()
     {
-        MessageService.Messages
+        subscriber1 = MessageService.Messages
             .Where(x => x.Source == Source)
             .OfType<ErrorMessage>()
-            .Do(x => LastErrorMessage = x)
-            .Select(_ => Observable.FromAsync(async () => await InvokeAsync(() => StateHasChanged())))
-            .Concat()
+            .Select(x => Observable.FromAsync(async () => await InvokeAsync(() =>
+            {
+                LastErrorMessage = x;
+                StateHasChanged();
+            })))
+            .Switch()
             .Subscribe();
 
-        MessageService.Messages
+        subscriber2 = MessageService.Messages
             .Where(x => x.Source == Source)
             .OfType<CounterMessage>()
-            .Do(x => LastCounterMessage = x)
-            .Select(_ => Observable.FromAsync(async () => await InvokeAsync(() => StateHasChanged())))
-            .Concat()
+            .Select(x => Observable.FromAsync(async () => await InvokeAsync(() =>
+            {
+                LastCounterMessage = x;
+                StateHasChanged();
+            })))
+            .Switch()
             .Subscribe();
     }
 }

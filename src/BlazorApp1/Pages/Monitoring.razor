@@ -1,0 +1,52 @@
+﻿@page "/monitoring"
+@using Services
+@using Models.Messages
+@using System.Reactive.Linq
+@implements IDisposable
+@inject IMessageService MessageService
+
+
+<h1>Monitoring</h1>
+
+<p>
+    Errors monitoring.
+</p>
+@if (Errors?.Any() ?? false)
+{
+    <ul class="list-group list-group-flush">
+        @foreach (var item in Errors)
+        {
+            <li class="list-group-item">
+                @item.Error
+                <br />
+                <small class="font-italic">@item.Date &mdash; Source <strong>@item.Source</strong></small>
+            </li>
+        }
+    </ul>
+}
+
+
+@code
+{
+    public List<ErrorMessage> Errors { get; set; } = new List<ErrorMessage>();
+
+    IDisposable subscriber;
+
+    public void Dispose()
+    {
+        subscriber?.Dispose();
+    }
+
+    protected override void OnInitialized()
+    {
+        subscriber = MessageService.Messages
+            .OfType<ErrorMessage>()
+            .Select(x => Observable.FromAsync(async () => await InvokeAsync(() =>
+            {
+                Errors = Errors.Prepend(x).Take(10).ToList();
+                StateHasChanged();
+            })))
+            .Switch()
+            .Subscribe();
+    }
+}

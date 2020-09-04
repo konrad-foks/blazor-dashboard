@@ -14,6 +14,8 @@ namespace BlazorApp1
     public class MessagesGeneratorBackgroundService : IHostedService
     {
         readonly IMessageService messageService;
+        IDisposable subscriber1;
+        IDisposable subscriber2;
 
         public MessagesGeneratorBackgroundService(IMessageService messageService)
         {
@@ -25,7 +27,7 @@ namespace BlazorApp1
             var sources = new string[] { "A", "B", "C" };
             var faker = new Faker();
 
-            Observable
+            subscriber1 = Observable
                 .Interval(TimeSpan.FromSeconds(1))
                 .Subscribe(x =>
                 {
@@ -37,7 +39,7 @@ namespace BlazorApp1
                     });
                 });
 
-            Observable
+            subscriber2 = Observable
                 .Interval(TimeSpan.FromSeconds(2))
                 .Subscribe(x =>
                 {
@@ -50,9 +52,10 @@ namespace BlazorApp1
                 });
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            subscriber1?.Dispose();
+            subscriber2?.Dispose();
         }
     }
 }
